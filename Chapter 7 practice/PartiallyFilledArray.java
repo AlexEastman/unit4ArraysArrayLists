@@ -2,7 +2,7 @@ public class PartiallyFilledArray
 {
     private int[] values;
     private int currentSize;
-    
+   
     public PartiallyFilledArray()
     {
         values = new int[10];
@@ -24,7 +24,7 @@ public class PartiallyFilledArray
         return str;
     }
     
-    public void fillInElementsRandomly( int numberOfElements, int maxValue)
+    public void fillInElementsRandomly(int numberOfElements, int maxValue)
     {
         for(int i =0; i<numberOfElements; i++)
         {
@@ -46,5 +46,27 @@ public class PartiallyFilledArray
         values[b] = c;
         
         
+    }
+    
+    public void insertElement(int val)
+    {
+        if (currentSize == values.length)
+        {
+            growArray();
+        }
+        values[currentSize] = val;
+        currentSize++;
+        
+    }
+    
+    private void growArray()
+    {
+        int newArraySize = values.length*2;
+        int[] newArray = new int[newArraySize];
+        for(int i = 0; i<values.length; i++)
+        {
+            newArray[i] = values[i];
+        }
+        values = newArray;
     }
 }
