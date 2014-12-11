@@ -24,6 +24,11 @@ public class Radar
     // number of scans of the radar since construction
     private int numScans;
 
+    public float getNoiseFraction()
+    {
+        return (float) noiseFraction;
+    }
+    
     /**
      * Constructor for objects of class Radar
      * 
@@ -41,7 +46,7 @@ public class Radar
         monsterLocationRow = (int)(Math.random() * rows);
         monsterLocationCol = (int)(Math.random() * cols);
         
-        noiseFraction = 0.05;
+        noiseFraction = 0;
         numScans= 0;
     }
     
