@@ -39,7 +39,8 @@ public class Radar
     {
         // initialize instance variables
         currentScan = new boolean[rows][cols]; // elements will be set to false
-        accumulator = new int[rows][cols]; // elements will be set to 0
+        accumulator = new int[11][11]; 
+        
         
         // randomly set the location of the monster (can be explicity set through the
         //  setMonsterLocation method
@@ -48,6 +49,11 @@ public class Radar
         
         noiseFraction = 0;
         numScans= 0;
+    }
+    
+    public void updateAccumulator()
+    {
+        
     }
     
     /**
@@ -72,16 +78,7 @@ public class Radar
         injectNoise();
         
         // udpate the accumulator
-        for(int row = 0; row < currentScan.length; row++)
-        {
-            for(int col = 0; col < currentScan[0].length; col++)
-            {
-                if(currentScan[row][col] == true)
-                {
-                   accumulator[row][col]++;
-                }
-            }
-        }
+        updateAccumulator();
         
         // keep track of the total number of scans
         numScans++;
