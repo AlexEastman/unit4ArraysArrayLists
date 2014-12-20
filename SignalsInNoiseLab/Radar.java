@@ -10,6 +10,10 @@ public class Radar
     
     // stores whether each cell triggered detection for the current scan of the radar
     private boolean[][] currentScan;
+    private boolean[][] lastScan;
+    
+    private int velocityX;
+    private int velocityY;
     
     // value of each cell is incremented for each scan in which that cell triggers detection 
     private int[][] accumulator;
@@ -35,33 +39,85 @@ public class Radar
      * @param   rows    the number of rows in the radar grid
      * @param   cols    the number of columns in the radar grid
      */
-    public Radar(int rows, int cols)
+    public Radar(int rows, int cols, int dx, int dy)
     {
         // initialize instance variables
+        lastScan = new boolean[rows][cols]; // elements will be set to false
         currentScan = new boolean[rows][cols]; // elements will be set to false
         accumulator = new int[11][11]; 
-        
+        velocityX = dx;
+        velocityY = dy;
         
         // randomly set the location of the monster (can be explicity set through the
         //  setMonsterLocation method
-        monsterLocationRow = (int)(Math.random() * rows);
-        monsterLocationCol = (int)(Math.random() * cols);
+        monsterLocationRow = (int)(Math.random() * rows/2);
+        monsterLocationCol = (int)(Math.random() * cols/2);
+        if(dx<0)
+        {
+            monsterLocationCol+=50;
+        }
+        
+        if(dy<0)
+        {
+            monsterLocationRow +=50;
+        }
         
         noiseFraction = 0;
         numScans= 0;
     }
     
+    
+     /**
+     * updates the accumulator of all the dx dy combinations
+     *
+     * @param no parameters
+     * @return    returns void
+     */
+
     public void updateAccumulator()
     {
-        
+        for(int r=0;r<currentScan.length;r++)
+        {
+            for(int c = 0; c<currentScan[0].length; c++)
+            {
+                if( currentScan[r][c] == true)
+                {
+                    //set search parameters
+                    int upperX = c+5;
+                    int upperY = r+5;
+                    int lowerX = c-5;
+                    int lowerY = r-5;
+                    
+                    //insures the upper bounds never exceed the dimensions of the scans
+                    upperX = ((upperX-currentScan[0].length)-Math.abs(upperX-currentScan[0].length))/2 + currentScan[0].length; 
+                    upperY = ((upperY-currentScan.length)-Math.abs(upperY-currentScan.length))/2 + currentScan.length;
+                    //insures the lower bounds never exceed the dimensions of the scans
+                    lowerX = (lowerX+ Math.abs(lowerX))/2;
+                    lowerY = (lowerY+ Math.abs(lowerY))/2;
+                    
+                    for(int y=lowerY; y<upperY; y++)
+                    {
+                        for(int x = lowerX; x<upperX; x++)
+                        {
+                            if(lastScan[y][x] == true)
+                            {
+                                accumulator[r-y+5][c-x+5]++;//increments the found dx dy pair.
+                            }
+                            }
+                    }
+                    
+                }
+            }
+        }
     }
     
     /**
      * Performs a scan of the radar. Noise is injected into the grid and the accumulator is updated.
      * 
      */
-    public void scan()
+    public boolean scan()
     {
+        updateLastScan();
         // zero the current scan grid
         for(int row = 0; row < currentScan.length; row++)
         {
@@ -82,8 +138,31 @@ public class Radar
         
         // keep track of the total number of scans
         numScans++;
+        
+        return moveMonster();
     }
 
+    /**
+    * moves the monster according to the known dx and dy values
+    *
+    * @param  no parameter
+    * @return     boolean that determines stop condition in radar viewer while loop
+    */
+    private boolean moveMonster()
+    {
+        int y = monsterLocationRow+velocityY;
+        int x = monsterLocationCol+velocityX;
+        if(y<100 && y>0 && x<100 && x>0)
+        {
+            setMonsterLocation(y,x);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
     /**
      * Sets the location of the monster
      * 
@@ -139,6 +218,37 @@ public class Radar
     }
     
     /**
+    * calculates and returns the dx and dy value
+    *
+    * @param  y   no parameters
+    * @return  the int[] array dx is stored in index 0 dy is in index 1
+    */
+    public int[] getDxDy()
+    {
+        int[] arr = new int[2];
+        
+        int dx = 0;
+        int dy = 0;
+        int v = accumulator[0][0];
+        for(int r = 0; r<11; r++)
+        {
+            for(int c = 1; c<11; c++)
+            {
+                if(accumulator[r][c]>v)
+                {
+                    v=accumulator[r][c];
+                    dx = c;
+                    dy = r;
+                }
+            }
+        }
+        arr[0] = dx-5;//offset from indexs to velocity is 5
+        arr[1] = dy-5;
+        return arr;
+        
+    }
+    
+    /**
      * Returns the number of rows in the radar grid
      * 
      * @return the number of rows in the radar grid
@@ -187,4 +297,23 @@ public class Radar
         }
     }
     
+    
+    /**
+    * this method copies all elements from the current scan to the old scan so they can be compared
+    *
+    * @param  no parameters
+    * @return    void
+    */
+    private void updateLastScan()
+    {
+        for(int r = 0; r<currentScan.length;r++)
+        {
+            for( int c = 0; c<currentScan[0].length; c++)
+            {
+                lastScan[r][c] = currentScan[r][c];
+            }
+        }
+    }
 }
+
+
